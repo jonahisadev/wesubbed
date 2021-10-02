@@ -23,6 +23,7 @@ function subscribe(id)
                 console.log(err);
             }
         });
+        all_subbed.push(id);
     }
 }
 
