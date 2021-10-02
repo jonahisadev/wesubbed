@@ -1,1 +1,3 @@
  - permissions?
+ - webhook validation
+ - automatic deploy

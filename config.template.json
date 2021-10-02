@@ -1,0 +1,6 @@
+{
+    "token": "xxxxxxxxxx",
+    "prefix": "!wesub_dev",
+    "yt_api": "xxxxxxxxxx",
+    "callback": "http://host:port"
+}
