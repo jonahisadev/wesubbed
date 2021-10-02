@@ -27,14 +27,24 @@ function subscribe(id)
     }
 }
 
+function unsubscribe(id)
+{
+    subscriber.unsubscribe(topic + id, hub, (err) => {
+        if (err) {
+            console.log(err);
+        }
+    });
+}
+
 const subscriber = feed.createServer({
-    callbackUrl: 'http://test.cubewithme.com:22765'
+    callbackUrl: config['callback']
 });
 subscriber.on('listen', () => {
 
     Guild.find().then(guilds => {
         guilds.forEach(guild => {
             guild.subscribed.forEach(channel_id => {
+                unsubscribe(channel_id);
                 subscribe(channel_id);
             })
         });
