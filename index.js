@@ -6,6 +6,8 @@ const xml = require('fast-xml-parser');
 const Guild = require('./guild.db');
 const youtube = require('./youtube');
 
+require('dotenv').config();
+
 // Config
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')));
@@ -87,6 +89,13 @@ client.on('guildCreate', (guild) => {
     });
     g.save({}).then(_ => {
         console.log("Saved new server to database");
+    });
+});
+
+// Leave server
+client.on('guildDelete', (guild) => {
+    Guild.deleteOne({ server: guild.id.toString() }).then(_ => {
+        console.log("Removed from server, deleted data");
     });
 });
 
@@ -232,7 +241,10 @@ function getVideoLink(data)
 }
 
 // Listen to feed
-subscriber.listen(22765);
+if (process.env.MODE !== 'development') {
+    subscriber.listen(22765);
+    console.log("Feed listening on 22765");
+}
 
 // const test_link = getVideoLink(fs.readFileSync(path.join(__dirname, 'test.xml')));
 // console.log(test_link);
