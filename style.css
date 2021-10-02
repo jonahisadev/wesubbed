@@ -1,6 +1,11 @@
 @font-face {
     font-family: Roboto;
-    src: url('Roboto-Regular.ttf');
+    src: url('fonts/Roboto-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    src: url('fonts/RobotoMono-Bold.ttf');
 }
 
 body {
@@ -46,7 +51,7 @@ a {
 .container {
     width: 50%;
     margin-left: 25%;
-    padding-top: 15%;
+    padding-top: 5%;
 }
 
 .container h1 {
@@ -62,6 +67,32 @@ a {
     margin: 5px;
 }
 
+.commands {
+    background-color: #333;
+    padding: 15px;
+    border: 1px #111;
+    width: 50%;
+    margin-left: 25%;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+.commands h4 {
+    margin: 5px 0px;
+    font-weight: bolder;
+    color: #FFF;
+    font-family: 'Roboto Mono';
+}
+
+.commands span {
+    color: #EEE;
+}
+
+.cmd {
+    margin-bottom: 15px;
+}
+
 .buttons {
     width: 50%;
     margin-left: 25%;
@@ -74,4 +105,25 @@ a {
     left: 50%;
     text-align: center;
     transform: translate(-50%, 0);
+}
+
+@media screen and (max-width: 1350px) {
+    .commands,
+    .buttons {
+        width: 100%;
+        margin-left: 0%;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .container {
+        width: 95%;
+        margin-left: 2.5%;
+    }
+
+    .commands,
+    .buttons {
+        width: 100%;
+        margin-left: 0px;
+    }
 }
