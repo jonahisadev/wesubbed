@@ -10,7 +10,59 @@ const youtube = require('./youtube');
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] });
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json')));
 
-// Start
+// Feed
+const hub = 'http://pubsubhubbub.appspot.com/';
+const topic = 'https://www.youtube.com/xml/feeds/videos.xml?channel_id=';
+const all_subbed = [];
+
+function subscribe(id)
+{
+    if (!all_subbed.includes(id)) {
+        subscriber.subscribe(topic + id, hub, (err) => {
+            if (err) {
+                console.log(err);
+            }
+        });
+    }
+}
+
+const subscriber = feed.createServer({
+    callbackUrl: 'http://test.cubewithme.com:22765'
+});
+subscriber.on('listen', () => {
+
+    Guild.find().then(guilds => {
+        guilds.forEach(guild => {
+            guild.subscribed.forEach(channel_id => {
+                subscribe(channel_id);
+            })
+        });
+    });
+});
+subscriber.on('subscribe', data => {
+    console.log('Subscribed: ' + data.topic);
+});
+subscriber.on('feed', data => {
+    console.log('We got something!');
+    const [link, channel_id] = getVideoLink(data.feed);
+
+    if (!link)
+        return;
+
+    // const [link, channel_id] = getVideoLink(fs.readFileSync(path.join(__dirname, 'test.xml')));
+
+    Guild.find({ subscribed: channel_id }).then(guilds => {
+        guilds.forEach(guild_obj => {
+            client.guilds.fetch(guild_obj.server).then(guild => {
+                guild.channels.fetch(guild_obj.channel_out).then(channel => {
+                    channel.send("New Video: " + link);
+                });
+            });
+        });
+    });
+});
+
+// Start Discord
 client.once('ready', () => {
     console.log("Here we go!");
 });
@@ -60,6 +112,9 @@ client.on('message', async (message) => {
                         doc.save({}).then(_ => {
                             console.log("Saved document");
                         });
+
+                        // Subscribe
+                        subscribe(id);
                     });
                 });
                 break;
@@ -87,51 +142,22 @@ client.login(config['token']);
 
 function getVideoLink(data)
 {
+    console.log(data.toString());
     const video = xml.parse(data.toString());
+    console.log(video);
+
+    // Ignore deleted videos
+    if (video.feed['at:deleted-entry']) {
+        return [];
+    }
+
     return [
         'https://youtube.com/watch?v=' + video.feed.entry['yt:videoId'],
         video.feed.entry['yt:channelId']
     ];
 }
 
-// Feed
-const subscriber = feed.createServer({
-    callbackUrl: 'http://18.221.66.24:22765'
-});
-subscriber.on('listen', () => {
-    const hub = 'http://pubsubhubbub.appspot.com/';
-    const topic = 'https://www.youtube.com/xml/feeds/videos.xml?channel_id=';
-
-    Guild.find().then(guilds => {
-        guilds.forEach(guild => {
-            guild.subscribed.forEach(channel_id => {
-                subscriber.subscribe(topic + channel_id, hub, (err) => {
-                    if (err) {
-                        console.log(err);
-                    }
-                });
-            })
-        });
-    });
-});
-subscriber.on('subscribe', (data) => {
-    console.log('Subscribed to ' + data.topic);
-});
-subscriber.on('feed', data => {
-    const [link, channel_id] = getVideoLink(data.feed);
-
-    // const [link, channel_id] = getVideoLink(fs.readFileSync(path.join(__dirname, 'test.xml')));
-
-    Guild.find({ subscribed: channel_id }).then(guilds => {
-        guilds.forEach(guild_obj => {
-            client.guilds.fetch(guild_obj.server).then(guild => {
-                guild.channels.fetch(guild_obj.channel_out).then(channel => {
-                    channel.send("New Video: " + link);
-                });
-            });
-        });
-    });
-});
+// Listen to feed
 subscriber.listen(22765);
 
 // const test_link = getVideoLink(fs.readFileSync(path.join(__dirname, 'test.xml')));
