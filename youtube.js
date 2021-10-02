@@ -46,6 +46,21 @@ async function getChannelID(url)
     });
 }
 
+async function getChannelNameFromID(id)
+{
+    return new Promise((res, rej) => {
+        yt.channels.list({ id: id, part: 'snippet' }).then(result => {
+            if (result.data.items.length == 0) {
+                rej("Could not find channel with ID " + id);
+                return;
+            }
+
+            res(result.data.items[0].snippet.title);
+        });
+    });
+}
+
 module.exports = {
-    getChannelID
+    getChannelID,
+    getChannelNameFromID
 }
