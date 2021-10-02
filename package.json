@@ -1,0 +1,17 @@
+{
+  "name": "ytsub",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon ."
+  },
+  "dependencies": {
+    "discord.js": "^13.1.0",
+    "fast-xml-parser": "^3.20.3",
+    "googleapis": "^88.2.0",
+    "mongoose": "^6.0.8",
+    "nodemon": "^2.0.13",
+    "pubsubhubbub": "^1.0.1"
+  }
+}
