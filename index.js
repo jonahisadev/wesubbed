@@ -82,6 +82,9 @@ client.on('guildCreate', (guild) => {
 
 // Handle commands
 client.on('message', async (message) => {
+    if (!message.member.permissions.has('MANAGE_CHANNELS'))
+        return;
+
     if (message.toString().startsWith(config['prefix'])) {
         const args = message.toString().split(' ');
 
