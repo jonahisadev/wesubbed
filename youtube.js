@@ -16,6 +16,11 @@ async function getChannelID(url)
         if (match) {
             res(match[1]);
             return;
+        } else if ((match = url.match(/https:\/\/.*\.youtube\.com\/user\/(.*)/))) {
+            yt.channels.list({ part: 'id', forUsername: match[1] }).then(res => {
+                res(res.data.items[0].id);
+                return;
+            });
         } else {
             match = url.match(/https:\/\/.*\.youtube\.com(\/.*)?\/(.*)/);
             if (!match) {

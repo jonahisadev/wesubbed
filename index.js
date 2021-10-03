@@ -17,9 +17,17 @@ const hub = 'http://pubsubhubbub.appspot.com/';
 const topic = 'https://www.youtube.com/xml/feeds/videos.xml?channel_id=';
 const all_subbed = [];
 
-function subscribe(id)
+async function sleep(ms)
+{
+    return new Promise((res) => {
+        setTimeout(res, ms);
+    });
+}
+
+async function subscribe(id)
 {
     if (!all_subbed.includes(id)) {
+        await sleep(500);
         subscriber.subscribe(topic + id, hub, (err) => {
             if (err) {
                 console.log(err);
