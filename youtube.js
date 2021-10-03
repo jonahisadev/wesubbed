@@ -37,10 +37,10 @@ async function getChannelID(url)
                 }
 
                 return yt.channels.list({ part: 'snippet', id: ids.join(',') }).then(result => {
-		    if (!result.data.items) {
-			rej("Could not find channel");
-		        return;
-		    }
+                    if (!result.data.items) {
+                        rej("Could not find channel");
+                        return;
+                    }
 
                     for (let c of result.data.items) {
                         if (c.snippet.customUrl === match[2].toLowerCase()) {

@@ -1,3 +1,3 @@
- - permissions?
+ - scrape vanity URL pages
  - webhook validation
  - automatic deploy

@@ -27,12 +27,13 @@ async function sleep(ms)
 async function subscribe(id)
 {
     if (!all_subbed.includes(id)) {
-	console.log("Trying to subscribe...");
-        subscriber.subscribe(topic + id, hub, (err) => {
+        console.log("Trying to subscribe...");
+        return subscriber.subscribe(topic + id, hub, (err) => {
             if (err) {
                 console.log(err);
             }
             all_subbed.push(id);
+            return 'Sent subscribe request';
         });
     }
 }
@@ -53,19 +54,19 @@ subscriber.on('listen', () => {
 
     Guild.find().then(guilds => {
         guilds.forEach(async guild => {
-	    for (let i = 0; i < guild.subscribed.length; i++) {
-		const channel_id = guild.subscribed[i];
-		await sleep(250);
-		console.log("Subscribing");
+            for (let i = 0; i < guild.subscribed.length; i++) {
+                const channel_id = guild.subscribed[i];
+                await sleep(250);
+                console.log("Subscribing");
                 unsubscribe(channel_id);
                 subscribe(channel_id);
-	    }
+            }
         });
     });
 });
 subscriber.on('subscribe', data => {
     if (!data.topic) {
-	console.log(data);
+        console.log(data);
     }
     console.log('Subscribed: ' + data.topic);
 });
@@ -82,7 +83,7 @@ subscriber.on('feed', data => {
         guilds.forEach(guild_obj => {
             client.guilds.fetch(guild_obj.server).then(guild => {
                 guild.channels.fetch(guild_obj.channel_out).then(channel => {
-                    channel.send("New Video: " + link);
+                    channel.send("**New Video:** " + link);
                 });
             });
         });
@@ -117,9 +118,9 @@ client.on('guildDelete', (guild) => {
 client.on('message', async (message) => {
 
     if (message.toString().startsWith(config['prefix'])) {
-	// Check we have permissions
-	if (!message.member || !message.member.permissions.has('MANAGE_CHANNELS')) {
-	    console.log("Can't check permissions");
+    // Check we have permissions
+    if (!message.member || !message.member.permissions.has('MANAGE_CHANNELS')) {
+        console.log("Can't check permissions");
             return;
         }
 
@@ -155,9 +156,11 @@ client.on('message', async (message) => {
                         });
 
                         // Subscribe
-                        subscribe(id).catch(e => {
-			    console.log(e);
-			});
+                        subscribe(id).then(msg => {
+                            console.log(msg);
+                        }).catch(e => {
+                            console.log(e);
+                        });
                     });
                 });
                 break;
@@ -185,8 +188,8 @@ client.on('message', async (message) => {
                     for (let i = 0; i < ids.length; i++) {
                         const id = ids[i];
                         const name = await youtube.getChannelNameFromID(id);
-			if (!name)
-			    continue;
+                        if (!name)
+                            continue;
                         names.set(id, name);
                     }
 
