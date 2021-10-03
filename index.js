@@ -80,6 +80,8 @@ subscriber.on('feed', data => {
     // const [link, channel_id] = getVideoLink(fs.readFileSync(path.join(__dirname, 'test.xml')));
 
     Guild.find({ subscribed: channel_id }).then(guilds => {
+        console.log("Guilds with this channel: ");
+        console.log(guilds.map(x => x.server));
         guilds.forEach(guild_obj => {
             client.guilds.fetch(guild_obj.server).then(guild => {
                 guild.channels.fetch(guild_obj.channel_out).then(channel => {
