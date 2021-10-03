@@ -12,17 +12,17 @@ async function getChannelID(url)
 {
     return new Promise((res, rej) => {
         // Normal channel ID
-        let match = url.match(/https:\/\/.*\.youtube\.com\/channel\/(.*)/);
+        let match = url.match(/https:\/\/.*\.?youtube\.com\/channel\/(.*)/);
         if (match) {
             res(match[1]);
             return;
-        } else if ((match = url.match(/https:\/\/.*\.youtube\.com\/user\/(.*)/))) {
-            yt.channels.list({ part: 'id', forUsername: match[1] }).then(res => {
-                res(res.data.items[0].id);
+        } else if ((match = url.match(/https:\/\/.*\.?youtube\.com\/user\/(.*)/))) {
+            yt.channels.list({ part: 'id', forUsername: match[1] }).then(result => {
+                res(result.data.items[0].id);
                 return;
             });
         } else {
-            match = url.match(/https:\/\/.*\.youtube\.com(\/.*)?\/(.*)/);
+            match = url.match(/https:\/\/.*\.?youtube\.com(\/.*)?\/(.*)/);
             if (!match) {
                 rej("Invalid YouTube channel URL");
                 return;
@@ -37,6 +37,10 @@ async function getChannelID(url)
                 }
 
                 return yt.channels.list({ part: 'snippet', id: ids.join(',') }).then(result => {
+		    if (!result.data.items) {
+			rej("Could not find channel");
+		        return;
+		    }
 
                     for (let c of result.data.items) {
                         if (c.snippet.customUrl === match[2].toLowerCase()) {
@@ -55,8 +59,8 @@ async function getChannelNameFromID(id)
 {
     return new Promise((res, rej) => {
         yt.channels.list({ id: id, part: 'snippet' }).then(result => {
-            if (result.data.items.length == 0) {
-                rej("Could not find channel with ID " + id);
+            if (!result.data.items) {
+                res(null);
                 return;
             }
 

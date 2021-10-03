@@ -27,7 +27,7 @@ async function sleep(ms)
 async function subscribe(id)
 {
     if (!all_subbed.includes(id)) {
-        await sleep(500);
+	console.log("Trying to subscribe...");
         subscriber.subscribe(topic + id, hub, (err) => {
             if (err) {
                 console.log(err);
@@ -52,15 +52,21 @@ const subscriber = feed.createServer({
 subscriber.on('listen', () => {
 
     Guild.find().then(guilds => {
-        guilds.forEach(guild => {
-            guild.subscribed.forEach(channel_id => {
+        guilds.forEach(async guild => {
+	    for (let i = 0; i < guild.subscribed.length; i++) {
+		const channel_id = guild.subscribed[i];
+		await sleep(250);
+		console.log("Subscribing");
                 unsubscribe(channel_id);
                 subscribe(channel_id);
-            })
+	    }
         });
     });
 });
 subscriber.on('subscribe', data => {
+    if (!data.topic) {
+	console.log(data);
+    }
     console.log('Subscribed: ' + data.topic);
 });
 subscriber.on('feed', data => {
@@ -109,10 +115,14 @@ client.on('guildDelete', (guild) => {
 
 // Handle commands
 client.on('message', async (message) => {
-    if (!message.member.permissions.has('MANAGE_CHANNELS'))
-        return;
 
     if (message.toString().startsWith(config['prefix'])) {
+	// Check we have permissions
+	if (!message.member || !message.member.permissions.has('MANAGE_CHANNELS')) {
+	    console.log("Can't check permissions");
+            return;
+        }
+
         const args = message.toString().split(' ');
 
         switch (args[1]) {
@@ -145,7 +155,9 @@ client.on('message', async (message) => {
                         });
 
                         // Subscribe
-                        subscribe(id);
+                        subscribe(id).catch(e => {
+			    console.log(e);
+			});
                     });
                 });
                 break;
@@ -173,6 +185,8 @@ client.on('message', async (message) => {
                     for (let i = 0; i < ids.length; i++) {
                         const id = ids[i];
                         const name = await youtube.getChannelNameFromID(id);
+			if (!name)
+			    continue;
                         names.set(id, name);
                     }
 
@@ -205,7 +219,9 @@ client.on('message', async (message) => {
                     // Send down the line
                     message.guild.channels.fetch(guild.channel_out).then(channel => {
                         channel.send({ embeds });
+                        message.react('👍');
                     });
+
                 });
 
                 break;
